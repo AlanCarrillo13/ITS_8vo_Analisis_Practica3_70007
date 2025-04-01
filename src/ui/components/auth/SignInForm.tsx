@@ -7,8 +7,7 @@ import Button from "../ui/button/Button";
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { AuthServiceImpl } from "../../../infrastructure/services/AuthServiceImpl";
-import { LoginUseCase } from "../../../core/useCases/LoginUseCase";
+
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,20 +28,31 @@ export default function SignInForm() {
   })
 
   const handleSubmit = async (data: { email: string; password: string }) => {
-    const authService = new AuthServiceImpl();
-    const loginUseCase = new LoginUseCase(authService);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
 
-    const user = await loginUseCase.execute(data.email, data.password);
-    if (user) {
-      console.log('Login successful', user);
-        alert('Login successful');
-        localStorage.setItem('token', user.token);
-        window.location.href = '/';
-    } else {
-      console.log('Login failed');
-        alert('Login failed');
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Login successful");
+        window.location.href = "/";
+      } else {
+        alert(result.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred during login");
     }
-  }
+  };
 
   return (
     <div className="flex flex-col flex-1">
