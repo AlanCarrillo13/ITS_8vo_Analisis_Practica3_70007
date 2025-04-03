@@ -39,10 +39,18 @@ export default function SignInForm() {
           password: data.password,
         }),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
+        // Calcular el timestamp de expiración
+        const currentTime = Math.floor(Date.now() / 1000); // tiempo actual en segundos
+        const expirationTimestamp = currentTime + Number(result.user.expires_in);
+  
+        // Guardar token y timestamp de expiración en localStorage
+        localStorage.setItem("token", result.user.token);
+        localStorage.setItem("token_expiration", expirationTimestamp.toString());
+  
         alert("Login successful");
         window.location.href = "/";
       } else {
@@ -53,6 +61,7 @@ export default function SignInForm() {
       alert("An error occurred during login");
     }
   };
+  
 
   return (
     <div className="flex flex-col flex-1">
